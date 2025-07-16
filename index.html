@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mocco Breakdown</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      h2 {
+        font-size: 1.15rem;
+      }
+      p {
+        margin-top: 0;
+        margin-bottom: 1rem;
+      }
+      a,
+      a:visited {
+        color: #000;
+      }
+      a:hover {
+        text-decoration: none;
+      }
+      table {
+        border-spacing: 0;
+        border-collapse: collapse;
+      }
+      table td,
+      table th {
+        border: 1px solid black;
+        padding: 0.666rem;
+        text-align: left;
+      }
+      form {
+        margin-bottom: 2rem;
+      }
+      input {
+        padding: 0.666rem;
+        width: 250px;
+        margin-bottom: 0.25rem;
+      }
+      button {
+        padding: 0.666rem;
+      }
+      .small {
+        font-size: 0.75rem;
+        color: #666;
+      }
+      #footer {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mocco Breakdown</h1>
+    <p>Week based breakdown, of hours per project.</p>
+    <form id="form">
+      <input
+        id="api-key"
+        name="api-key"
+        value=""
+        placeholder="API Key..."
+        required
+      />
+      <button type="submit">Refresh</button>
+      <p class="small">
+        API Key can be found in Mocco under <em>Profile > Integrations</em>
+      </p>
+    </form>
+    <div id="app"></div>
+    <p id="footer">
+      <a target="_blank" href="https://github.com/ArcoMul/mocco-breakdown"
+        >Open-Source</a
+      >
+    </p>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
