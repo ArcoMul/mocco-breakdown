@@ -29,25 +29,27 @@ function getCurrentWeekRange() {
 
 const errorTemplate = ({ error }) => html`<p class="danger">${error}</p>`;
 
-const tableTemplate = ({ weekRange, hours }) =>
-  html` <h2>${formatDate(weekRange.from)} → ${formatDate(weekRange.to)}</h2>
-    ${hours &&
-    html`<table>
-      <thead>
-        <tr>
-          <th>Project</th>
-          <th>Hours</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${Object.keys(hours).map((key) => {
-          return html`<tr>
-            <td>${key}</td>
-            <td>${formatHours(hours[key])}</td>
-          </tr>`;
-        })}
-      </tbody>
-    </table>`}`;
+const dateRangeTemplate = ({ dateRange }) =>
+  html`<h2>${formatDate(dateRange.from)} → ${formatDate(dateRange.to)}</h2>`;
+
+const hourTableTemplate = ({ name, hours }) =>
+  hours &&
+  html`<table>
+    <thead>
+      <tr>
+        <th>${name}</th>
+        <th>Hours</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${Object.keys(hours).map((key) => {
+        return html`<tr>
+          <td>${key}</td>
+          <td>${formatHours(hours[key])}</td>
+        </tr>`;
+      })}
+    </tbody>
+  </table>`;
 
 const app = document.getElementById("app");
 const form = document.getElementById("form");
@@ -55,9 +57,9 @@ const apiKey = document.getElementById("api-key");
 
 apiKey.value = localStorage.getItem("apiKey");
 
-const weekRange = getCurrentWeekRange();
+const dateRange = getCurrentWeekRange();
 
-render(tableTemplate({ weekRange }), app);
+render(hourTableTemplate({ weekRange: dateRange }), app);
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -67,8 +69,8 @@ form.addEventListener("submit", async (e) => {
 
   // Fetch data
   const url = new URL("https://denkwerk.mocoapp.com/api/v1/activities");
-  url.searchParams.set("from", formatDate(weekRange.from));
-  url.searchParams.set("to", formatDate(weekRange.to));
+  url.searchParams.set("from", formatDate(dateRange.from));
+  url.searchParams.set("to", formatDate(dateRange.to));
   try {
     const response = await fetch(url.toString(), {
       headers: {
@@ -77,7 +79,15 @@ form.addEventListener("submit", async (e) => {
     });
     const json = await response.json();
 
-    const hours = json.reduce((map, entry) => {
+    const customerHours = json.reduce((map, entry) => {
+      if (!map[entry.customer.name]) {
+        map[entry.customer.name] = 0;
+      }
+      map[entry.customer.name] += entry.hours;
+      return map;
+    }, {});
+
+    const projectHours = json.reduce((map, entry) => {
       if (!map[entry.project.name]) {
         map[entry.project.name] = 0;
       }
@@ -86,8 +96,22 @@ form.addEventListener("submit", async (e) => {
     }, {});
 
     // Render output
-    render(tableTemplate({ weekRange, hours }), app);
+    render(
+      html`${dateRangeTemplate({ dateRange })}
+        <div class="row">
+          ${hourTableTemplate({
+            name: "Customer",
+            hours: customerHours,
+          })}
+          ${hourTableTemplate({
+            name: "Project",
+            hours: projectHours,
+          })}
+        </div>`,
+      app
+    );
   } catch (err) {
+    console.log(err);
     render(errorTemplate({ error: "Sorry, error fetch data" }), app);
     return;
   }
